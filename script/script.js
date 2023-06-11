@@ -101,7 +101,7 @@ form.addEventListener('submit', async (event) => {
 
   baseStats.style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`; // Change color of "Base Stats" text
 
-  search.value = '';
+  search.value = searchValue;
 });
 
 pokedex.style.visibility = 'visible';
