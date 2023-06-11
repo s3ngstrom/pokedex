@@ -20,13 +20,13 @@ body {
 
 #pokedex {
   width: 22rem;
-  height: 35rem;
+  height: 44rem;
   border-radius: 8px;
   border-color: rgb(65, 58, 58);
-  border-style: dashed;
+  border: outset 10px #7e7e7e;
   padding: 0.3rem;
   transition: background-color 0.5s ease-in-out;
-  background-color: rgb(255, 151, 82);
+  background-color: rgb(154, 154, 154);
 }
 
 #top {
@@ -50,7 +50,7 @@ body {
   border: none;
   font-size: 1.2rem;
   font-weight: bold;
-  width: 60%;
+  width: 80%;
   text-transform: capitalize;
 }
 
@@ -115,7 +115,6 @@ body {
 
 .stat-desc {
   color:  rgb(255, 151, 82);
-  font-weight: bold;
   text-align: right;
   margin-right: 0.6rem;
   transition: color 0.5s ease-in-out;

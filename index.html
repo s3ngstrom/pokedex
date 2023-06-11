@@ -15,27 +15,32 @@
           <input
             type="text"
             id="search"
-            placeholder="Search Pokémon..."
+            placeholder="Enter Name"
           />
-          <button type="submit">Search</button>
+          <div class="autocom-box">
+            <!-- here list are inserted from javascript -->
+          </div>
+          <div><button type="submit">Search</button></div>
         </form>
-        <span id="number">#001</span>
+        <span id="number">000</span>
       </div>
       <div id="poke-image-placeholder">
         <img src="images/pokemon-questionmark.png" id="pokemon-image" alt="pokemon-image" />
       </div>
     </div>
+    
     <div id="data">
+    <h3 id="pokemon-name" style="color:  rgb(0, 0, 0);">Pokémon Name</h4>
+
       <div id="types">
+        
         <span
           style="background-color: rgb(255, 151, 82);"
           class="type"
-        >
-          Select Pokemon Above
+        > Select Pokémon Above
         </span>
         
       </div>
-
       <h4 id="base-stats" style="color:  rgb(255, 151, 82);">Base Stats</h4>
 
       <div id="stats">

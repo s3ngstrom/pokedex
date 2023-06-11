@@ -1,14 +1,15 @@
-const search = document.querySelector('#search');
-const number = document.querySelector('#number');
-const pokemonImage = document.querySelector('#pokemon-image');
-const types = document.querySelector('#types');
-const statNumber = document.querySelectorAll('.stat-number');
-const barInner = document.querySelectorAll('.bar-inner');
-const barOuter = document.querySelectorAll('.bar-outer');
-const statDesc = document.querySelectorAll('.stat-desc');
-const baseStats = document.querySelector('#base-stats');
-const pokedex = document.querySelector('#pokedex');
-const suggestionsList = document.querySelector('#suggestions-list');
+const search = document.querySelector("#search");
+const number = document.querySelector("#number");
+const pokemonImage = document.querySelector("#pokemon-image");
+const types = document.querySelector("#types");
+const statNumber = document.querySelectorAll(".stat-number");
+const barInner = document.querySelectorAll(".bar-inner");
+const barOuter = document.querySelectorAll(".bar-outer");
+const statDesc = document.querySelectorAll(".stat-desc");
+const baseStats = document.querySelector("#base-stats");
+const pokedex = document.querySelector("#pokedex");
+const suggestionsList = document.querySelector("#suggestions-list");
+const pokemonName = document.querySelector("#pokemon-name");
 
 const typeColors = {
   rock: [182, 158, 49],
@@ -32,9 +33,11 @@ const typeColors = {
 };
 
 const fetchApi = async (pkmnName) => {
-  const pkmnNameApi = pkmnName.toLowerCase().split(' ').join('-');
+  const pkmnNameApi = pkmnName.toLowerCase().split(" ").join("-");
 
-  const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + pkmnNameApi);
+  const response = await fetch(
+    "https://pokeapi.co/api/v2/pokemon/" + pkmnNameApi
+  );
 
   if (response.status === 200) {
     const pkmnData = await response.json();
@@ -44,64 +47,108 @@ const fetchApi = async (pkmnName) => {
   return false;
 };
 
-const generateAutocompleteOptions = (searchValue) => {
-  const autocompleteOptions = Object.keys(typeColors).filter((type) =>
-    type.startsWith(searchValue.toLowerCase())
+const generateAutocompleteOptions = async (searchValue) => {
+  const response = await fetch(
+    "https://pokeapi.co/api/v2/pokemon?limit=10&offset=0"
+  );
+  const data = await response.json();
+  const pokemonNames = data.results.map((result) => result.name);
+  const autocompleteOptions = pokemonNames.filter((name) =>
+    name.startsWith(searchValue.toLowerCase())
   );
   return autocompleteOptions;
 };
 
-search.addEventListener('input', (event) => {
-  const searchValue = event.target.value;
-  const autocompleteOptions = generateAutocompleteOptions(searchValue);
+const formatPokemonName = (name) => {
+  const words = name.split("-");
+  const capitalizedWords = words.map(
+    (word) => word.charAt(0).toUpperCase() + word.slice(1)
+  );
+  return capitalizedWords.join(" ");
+};
 
-  suggestionsList.innerHTML = '';
+const transformPokemonData = (pkmnData) => {
+  const formattedName = formatPokemonName(pkmnData.name);
+
+  return {
+    ...pkmnData,
+    name: formattedName,
+  };
+};
+
+search.addEventListener("input", async (event) => {
+  const searchValue = event.target.value;
+  const autocompleteOptions = await generateAutocompleteOptions(searchValue);
+
+  suggestionsList.innerHTML = "";
 
   autocompleteOptions.forEach((option) => {
-    const suggestion = document.createElement('option');
+    const suggestion = document.createElement("option");
     suggestion.value = option;
     suggestionsList.appendChild(suggestion);
   });
 });
 
-const form = document.querySelector('form');
-form.addEventListener('submit', async (event) => {
+const form = document.querySelector("form");
+const pokedexBorder = document.querySelector("#pokedex");
+
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const pkmnData = await fetchApi(search.value);
 
   if (!pkmnData) {
-    alert('Pokémon does not exist.');
+    alert("Pokémon does not exist.");
     return;
   }
 
-  const mainColor = typeColors[pkmnData.types[0].type.name];
-  pokedex.style.backgroundColor = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
-  number.textContent = `#${pkmnData.id.toString().padStart(3, '0')}`;
-  pokemonImage.src = pkmnData.sprites.other['official-artwork'].front_default;
+  const transformedData = transformPokemonData(pkmnData);
 
-  types.innerHTML = '';
-  pkmnData.types.forEach((t) => {
-    const newType = document.createElement('span');
+  const mainColor = typeColors[transformedData.types[0].type.name];
+  pokedex.style.backgroundColor = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
+  number.textContent = `#${transformedData.id.toString().padStart(3, "0")}`;
+  pokemonImage.src =
+    transformedData.sprites.other["official-artwork"].front_default;
+
+  types.innerHTML = "";
+  transformedData.types.forEach((t) => {
+    const newType = document.createElement("span");
     const color = typeColors[t.type.name];
 
     newType.textContent = t.type.name;
-    newType.classList.add('type');
+    newType.classList.add("type");
     newType.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 
     types.appendChild(newType);
   });
 
-  pkmnData.stats.forEach((s, i) => {
-    statNumber[i].textContent = s.base_stat.toString().padStart(3, '0');
+  transformedData.stats.forEach((s, i) => {
+    statNumber[i].textContent = s.base_stat.toString().padStart(3, "0");
     barInner[i].style.width = `${s.base_stat}%`;
-    barInner[i].style.backgroundColor = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
-    barOuter[i].style.backgroundColor = `rgba(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]}, 0.3)`;
-    statDesc[i].style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
+    barInner[
+      i
+    ].style.backgroundColor = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
+    barOuter[
+      i
+    ].style.backgroundColor = `rgba(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]}, 0.3)`;
+    statDesc[
+      i
+    ].style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
   });
+  baseStats.style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
 
-  baseStats.style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`; // Change color of "Base Stats" text
+  const darkenedColor = [
+    Math.max(mainColor[0] - 30, 0),
+    Math.max(mainColor[1] - 30, 0),
+    Math.max(mainColor[2] - 30, 0),
+  ];
 
-  search.value = searchValue;
+  pokedexBorder.style.borderColor = `rgb(${darkenedColor[0]}, ${darkenedColor[1]}, ${darkenedColor[2]})`;
+
+  pokemonName.textContent = transformedData.name;
+
+  search.blur();
+  pokedex.style.visibility = "visible";
 });
 
-pokedex.style.visibility = 'visible';
+search.value = pkmnData.name;
+pokemonName.textContent = pkmnData.name;
