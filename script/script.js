@@ -48,16 +48,16 @@ const fetchApi = async (pkmnName) => {
 };
 
 const generateAutocompleteOptions = async (searchValue) => {
-  const response = await fetch(
-    "https://pokeapi.co/api/v2/pokemon?limit=10&offset=0"
-  );
-  const data = await response.json();
-  const pokemonNames = data.results.map((result) => result.name);
-  const autocompleteOptions = pokemonNames.filter((name) =>
-    name.startsWith(searchValue.toLowerCase())
-  );
-  return autocompleteOptions;
-};
+    const response = await fetch(
+      "https://pokeapi.co/api/v2/pokemon?limit=1000"
+    );
+    const data = await response.json();
+    const pokemonNames = data.results.map((result) => result.name);
+    const autocompleteOptions = pokemonNames.filter((name) =>
+      name.startsWith(searchValue.toLowerCase())
+    );
+    return autocompleteOptions;
+  };
 
 const formatPokemonName = (name) => {
   const words = name.split("-");
@@ -77,17 +77,23 @@ const transformPokemonData = (pkmnData) => {
 };
 
 search.addEventListener("input", async (event) => {
-  const searchValue = event.target.value;
-  const autocompleteOptions = await generateAutocompleteOptions(searchValue);
-
-  suggestionsList.innerHTML = "";
-
-  autocompleteOptions.forEach((option) => {
-    const suggestion = document.createElement("option");
-    suggestion.value = option;
-    suggestionsList.appendChild(suggestion);
+    const searchValue = event.target.value;
+    const autocompleteOptions = await generateAutocompleteOptions(searchValue);
+  
+    suggestionsList.innerHTML = "";
+  
+    autocompleteOptions.forEach((option) => {
+      const suggestion = document.createElement("div");
+      suggestion.textContent = option;
+      suggestion.classList.add("suggestion");
+      suggestion.addEventListener("click", () => {
+        search.value = option;
+        suggestionsList.innerHTML = "";
+      });
+  
+      suggestionsList.appendChild(suggestion);
+    });
   });
-});
 
 const form = document.querySelector("form");
 const pokedexBorder = document.querySelector("#pokedex");
@@ -150,5 +156,22 @@ form.addEventListener("submit", async (event) => {
   pokedex.style.visibility = "visible";
 });
 
-search.value = pkmnData.name;
-pokemonName.textContent = pkmnData.name;
+// Additional code from previous version
+const endpoint = "https://pokeapi.co/api/v2/pokemon?limit=1000";
+let pokemonNames = [];
+
+async function fetchPokemonNames() {
+  const response = await fetch(endpoint);
+  const data = await response.json();
+  pokemonNames = data.results.map((result) => result.name);
+
+  const datalist = document.querySelector("#suggestions-list");
+  datalist.innerHTML = "";
+  pokemonNames.forEach((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    datalist.appendChild(option);
+  });
+}
+
+fetchPokemonNames();
