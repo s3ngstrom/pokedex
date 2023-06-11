@@ -99,6 +99,8 @@ form.addEventListener('submit', async (event) => {
     statDesc[i].style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`;
   });
 
+  baseStats.style.color = `rgb(${mainColor[0]}, ${mainColor[1]}, ${mainColor[2]})`; // Change color of "Base Stats" text
+
   search.value = '';
 });
 
