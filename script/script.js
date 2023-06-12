@@ -1,3 +1,4 @@
+// DOM elements
 const search = document.querySelector("#search");
 const number = document.querySelector("#number");
 const pokemonImage = document.querySelector("#pokemon-image");
@@ -11,6 +12,7 @@ const pokedex = document.querySelector("#pokedex");
 const suggestionsList = document.querySelector("#suggestions-list");
 const pokemonName = document.querySelector("#pokemon-name");
 
+// Colors for different types
 const typeColors = {
   rock: [182, 158, 49],
   ghost: [112, 85, 155],
@@ -32,6 +34,7 @@ const typeColors = {
   dragon: [112, 55, 255],
 };
 
+// Fetch Pokémon data from the API
 const fetchApi = async (pkmnName) => {
   const pkmnNameApi = pkmnName.toLowerCase().split(" ").join("-");
 
@@ -47,18 +50,29 @@ const fetchApi = async (pkmnName) => {
   return false;
 };
 
+// Generate autocomplete options based on the search value
 const generateAutocompleteOptions = async (searchValue) => {
-    const response = await fetch(
-      "https://pokeapi.co/api/v2/pokemon?limit=1000"
-    );
-    const data = await response.json();
-    const pokemonNames = data.results.map((result) => result.name);
-    const autocompleteOptions = pokemonNames.filter((name) =>
-      name.startsWith(searchValue.toLowerCase())
-    );
-    return autocompleteOptions;
-  };
+  const response = await fetch(
+    "https://pokeapi.co/api/v2/pokemon?limit=1000"
+  );
+  const data = await response.json();
+  const pokemonNames = data.results.map((result) => result.name);
+  const autocompleteOptions = pokemonNames.filter((name) =>
+    name.startsWith(searchValue.toLowerCase())
+  );
+  return autocompleteOptions.slice(0, 10);
+};
 
+// Transform Pokémon name from API format to display format
+const transformPokemonName = (name) => {
+  const words = name.split("-");
+  const capitalizedWords = words.map(
+    (word) => word.charAt(0).toUpperCase() + word.slice(1)
+  );
+  return capitalizedWords.join(" ");
+};
+
+// Format Pokémon name by capitalizing each word
 const formatPokemonName = (name) => {
   const words = name.split("-");
   const capitalizedWords = words.map(
@@ -67,6 +81,7 @@ const formatPokemonName = (name) => {
   return capitalizedWords.join(" ");
 };
 
+// Transform Pokémon data by formatting its name
 const transformPokemonData = (pkmnData) => {
   const formattedName = formatPokemonName(pkmnData.name);
 
@@ -76,25 +91,56 @@ const transformPokemonData = (pkmnData) => {
   };
 };
 
-search.addEventListener("input", async (event) => {
-    const searchValue = event.target.value;
+// Display the suggestions list when the search box is focused
+search.addEventListener("focus", async () => {
+    suggestionsList.innerHTML = "<div class='placeholder'>Type a Pokemon name...</div>";
+
+    // Check if there are any autocomplete options available
+    const searchValue = search.value;
     const autocompleteOptions = await generateAutocompleteOptions(searchValue);
   
-    suggestionsList.innerHTML = "";
-  
-    autocompleteOptions.forEach((option) => {
-      const suggestion = document.createElement("div");
-      suggestion.textContent = option;
-      suggestion.classList.add("suggestion");
-      suggestion.addEventListener("click", () => {
-        search.value = option;
-        suggestionsList.innerHTML = "";
-      });
-  
-      suggestionsList.appendChild(suggestion);
-    });
+    if (autocompleteOptions.length > 0) {
+      suggestionsList.style.display = "block";
+    }
   });
 
+  search.addEventListener("blur", () => {
+    suggestionsList.innerHTML = "";
+  });
+
+// Update the suggestions list as the user types
+search.addEventListener("input", async (event) => {
+  const searchValue = event.target.value;
+  const autocompleteOptions = await generateAutocompleteOptions(searchValue);
+
+  suggestionsList.innerHTML = "";
+
+  if (autocompleteOptions.length === 0) {
+    const noMatchOption = document.createElement("div");
+    noMatchOption.textContent = "No matching Pokemon found.";
+    noMatchOption.classList.add("suggestion");
+    suggestionsList.appendChild(noMatchOption);
+  } else {
+    autocompleteOptions.forEach((option) => {
+      const transformedName = transformPokemonName(option);
+      const suggestion = document.createElement("div");
+      suggestion.textContent = transformedName;
+      suggestion.classList.add("suggestion");
+suggestion.addEventListener("click", () => {
+      search.value = option;
+      suggestionsList.innerHTML = "";
+      suggestionsList.style.display = "none"; // Add this line to hide the suggestions list
+      form.dispatchEvent(new Event("submit"));
+    });
+
+    suggestionsList.appendChild(suggestion);
+  });
+
+  suggestionsList.style.display = autocompleteOptions.length > 0 ? "block" : "none"; // Add this line to hide the suggestions list if no options
+};
+});
+
+// Handle form submission
 const form = document.querySelector("form");
 const pokedexBorder = document.querySelector("#pokedex");
 
@@ -160,6 +206,7 @@ form.addEventListener("submit", async (event) => {
 const endpoint = "https://pokeapi.co/api/v2/pokemon?limit=1000";
 let pokemonNames = [];
 
+// Fetch the list of Pokémon names from the API
 async function fetchPokemonNames() {
   const response = await fetch(endpoint);
   const data = await response.json();

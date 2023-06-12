@@ -150,3 +150,29 @@ body {
 #base-stats {
   transition: color 0.5s ease-in-out;
 }
+
+#suggestions-list {
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  right: 0;
+  max-width: 50%;
+  background-color: #4f506a;
+  border-radius: 4px;
+  padding: 5px;
+  display: none; /* Hide the suggestions list by default */
+}
+
+.suggestion {
+  cursor: pointer;
+  padding: 5px;
+}
+
+.suggestion:hover {
+  background-color: #f2f2f2;
+}
+
+.placeholder {
+  color: gray;
+  font-style: italic;
+}
